@@ -159,7 +159,7 @@ impl DatFile {
 
     fn read_texture_file(&mut self, offset: u64, file_info: &FileInfo) -> Option<Vec<u8>> {
         let mut data: Vec<u8> = Vec::new();
-        
+
         let texture_file_info = file_info.texture_block.as_ref().unwrap();
 
         let mipmap_size = texture_file_info.lods[0].compressed_offset;

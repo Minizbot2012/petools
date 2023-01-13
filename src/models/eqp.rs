@@ -1,7 +1,7 @@
 use std::u8;
 
 use binrw::binrw;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::gamedata::equipslots::EquipSlot;
 
@@ -14,7 +14,7 @@ pub struct EqpJson {
 }
 #[binrw]
 #[br(import(cnt:u32,))]
-pub struct EqpDiskModel {
+pub struct EqpEntry {
     #[br(count = cnt)]
-    pub data: Vec<u8>
+    pub data: Vec<u8>,
 }

@@ -1,19 +1,21 @@
-use binrw::binrw;
-use serde::{Serialize, Deserialize};
+use binrw::binread;
+use serde::{Deserialize, Serialize};
 
-use crate::gamedata::{characterutils, gendermodelrace::{Gender, ModelRace}};
+use crate::gamedata::{
+    characterutils,
+    gendermodelrace::{Gender, ModelRace},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub enum EstType
-{
+pub enum EstType {
     Hair = characterutils::Index::HairEst as isize,
     Face = characterutils::Index::FaceEst as isize,
     Body = characterutils::Index::BodyEst as isize,
     Head = characterutils::Index::HeadEst as isize,
 }
 
-#[binrw]
-#[brw(little)]
+#[binread]
+#[br(little)]
 pub struct EstDisk {
     pub gr: u16,
     pub id: u16,

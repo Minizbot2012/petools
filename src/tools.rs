@@ -58,7 +58,7 @@ pub fn parse_meta_file(path: String) {
 
 fn parse_meta(meta: Vec<u8>) {
     let mut parser = Cursor::new(meta);
-    let meta = MetaFileHeader::read(&mut parser).expect("Error parsing meta block");
+    let mut meta = MetaFileHeader::read(&mut parser).expect("Error parsing meta block");
     let mta = meta.parse_meta_blocks(parser);
     println!("{:?}", mta);
     println!("{:?}", meta);

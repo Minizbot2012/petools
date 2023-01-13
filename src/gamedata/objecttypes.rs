@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum ObjectType {
@@ -18,6 +18,7 @@ pub enum ObjectType {
     Weapon,
     Font,
 }
+
 impl Default for ObjectType {
     fn default() -> Self {
         ObjectType::Unknown

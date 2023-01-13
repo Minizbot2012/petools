@@ -60,17 +60,17 @@ pub enum Race {
 }
 
 pub mod gr {
-    use binrw::binrw;
-    use num_derive::FromPrimitive;
     use crate::define_race_enum;
-    use paste::paste;
     use crate::gamedata::gendermodelrace::Gender;
+    use crate::gamedata::gendermodelrace::Gender::*;
     use crate::gamedata::gendermodelrace::ModelRace;
     use crate::gamedata::gendermodelrace::Race;
-    use crate::gamedata::gendermodelrace::Subrace;
-    use crate::gamedata::gendermodelrace::Gender::*;
     use crate::gamedata::gendermodelrace::Race::*;
+    use crate::gamedata::gendermodelrace::Subrace;
     use crate::gamedata::gendermodelrace::Subrace::*;
+    use binrw::binrw;
+    use num_derive::FromPrimitive;
+    use paste::paste;
     define_race_enum! {
         pub enum GenderRace {
             [101](Hyur, Male, Midlander),

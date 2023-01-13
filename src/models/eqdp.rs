@@ -1,5 +1,5 @@
-use std::u8;
 use serde::{Deserialize, Serialize};
+use std::u8;
 
 use crate::gamedata::{
     equipslots::EquipSlot,
@@ -16,4 +16,4 @@ pub struct EqdpJson {
     pub SetId: u16,
 }
 
-pub type EqdpDiskModel = u8;
+pub type EqdpDisk = u8;

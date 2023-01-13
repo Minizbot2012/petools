@@ -3,11 +3,11 @@ use std::io::Cursor;
 use crate::gamedata::equipslots::{BodySlot, EquipSlot};
 use crate::gamedata::gendermodelrace::gr::GenderRace;
 use crate::gamedata::objecttypes::ObjectType;
-use crate::models::eqdp::{EqdpDiskModel, EqdpJson};
-use crate::models::eqp::{EqpDiskModel, EqpJson};
+use crate::models::eqdp::{EqdpDisk, EqdpJson};
+use crate::models::eqp::{EqpEntry, EqpJson};
 use crate::models::est::{EstDisk, EstJson, EstType};
-use crate::models::gmp::{GmpDiskModel, GmpJson};
-use crate::models::imc::ImcEntry;
+use crate::models::gmp::GmpJson;
+use crate::models::imc::{ImcEntry, ImcJson};
 use crate::models::{gmp::GmpEntry, MetaManipulation};
 use array_tool::vec::Union;
 use binrw::{binrw, BinRead, NullString};
@@ -61,32 +61,29 @@ impl MetaFileHeader {
             .name("PrimaryType")
             .unwrap()
             .as_str();
-        self.typ = if mch.starts_with("chara/accessory/") {
-            ObjectType::Accessory
-        } else if mch.starts_with("chara/equipment/") {
-            ObjectType::Equipment
-        } else {
-            ObjectType::Housing
+        return match mch {
+            "accessory" => ObjectType::Accessory,
+            "equipment" => ObjectType::Equipment,
+            _ => ObjectType::Housing,
         };
-        return self.typ;
     }
     pub fn get_regex_st(&self) -> BodySlot {
         let re = Regex::new(r"chara/(?P<PrimaryType>[a-z]*)/(?P<PrimaryPrefix>[a-z])(?P<PrimaryId>\d{4})(/obj/(?P<SecondaryType>[a-z]*)?/?(?P<SecondaryPrefix>[a-z])?(?P<SecondaryId>\d{4}))?/[a-z]\d{4}.(?P<Slot>[a-z]{3})?(\d{4}?)?\.meta").expect("Failed to compile regex");
         let test = self.file_path.to_string();
-        let bs = re
-            .captures(test.as_str())
-            .unwrap()
-            .name("SecondaryType")
-            .unwrap()
-            .as_str();
-        return match bs {
-            "zear" => BodySlot::Zear,
-            "face" => BodySlot::Face,
-            "hair" => BodySlot::Hair,
-            "tail" => BodySlot::Tail,
-            "body" => BodySlot::Body,
-            _ => BodySlot::Unknown,
-        };
+        let opt = re.captures(test.as_str()).unwrap().name("SecondaryType");
+        if opt.is_some() {
+            let bs = opt.unwrap().as_str();
+            return match bs {
+                "zear" => BodySlot::Zear,
+                "face" => BodySlot::Face,
+                "hair" => BodySlot::Hair,
+                "tail" => BodySlot::Tail,
+                "body" => BodySlot::Body,
+                _ => BodySlot::Unknown,
+            };
+        } else {
+            return BodySlot::Unknown;
+        }
     }
     pub fn get_regex_pid(&self) -> String {
         let re = Regex::new(r"chara/(?P<PrimaryType>[a-z]*)/(?P<PrimaryPrefix>[a-z])(?P<PrimaryId>\d{4})(/obj/(?P<SecondaryType>[a-z]*)?/?(?P<SecondaryPrefix>[a-z])?(?P<SecondaryId>\d{4}))?/[a-z]\d{4}.(?P<Slot>[a-z]{3})?(\d{4}?)?\.meta").expect("Failed to compile regex");
@@ -101,7 +98,7 @@ impl MetaFileHeader {
         let re = Regex::new(r"chara/(?P<PrimaryType>[a-z]*)/(?P<PrimaryPrefix>[a-z])(?P<PrimaryId>\d{4})(/obj/(?P<SecondaryType>[a-z]*)?/?(?P<SecondaryPrefix>[a-z])?(?P<SecondaryId>\d{4}))?/[a-z]\d{4}.(?P<Slot>[a-z]{3})?(\d{4}?)?\.meta").expect("Failed to compile regex");
         re.captures(self.file_path.to_string().as_str())
             .unwrap()
-            .name("PrimaryId")
+            .name("SecondaryId")
             .unwrap()
             .as_str()
             .to_string()
@@ -124,7 +121,7 @@ impl MetaFileHeader {
             _ => panic!("unknown slot"),
         }
     }
-    pub fn parse_meta_blocks(&self, mut stream: Cursor<Vec<u8>>) -> Vec<MetaManipulation> {
+    pub fn parse_meta_blocks(&mut self, mut stream: Cursor<Vec<u8>>) -> Vec<MetaManipulation> {
         let mut retr: Vec<MetaManipulation> = Vec::new();
         for block in self.blocks.clone() {
             stream.set_position(block.meta_offset as u64);
@@ -134,7 +131,7 @@ impl MetaFileHeader {
                     let slot = self.get_regex_slot();
                     let (byts, offst) = slot.eqp_bytes_offset();
                     let mut num: u64 = 0;
-                    let eqp_data = EqpDiskModel::read_le_args(&mut stream, (byts,))
+                    let eqp_data = EqpEntry::read_le_args(&mut stream, (byts,))
                         .expect("Error reading eqp disk model");
                     for i in 0..eqp_data.data.len() {
                         num |= (eqp_data.data[i] as u64) << offst + (i as u32) * 8
@@ -156,8 +153,7 @@ impl MetaFileHeader {
                     stream.set_position(block.meta_offset as u64);
                     for _ in 1..num {
                         let gr = GenderRace::read_le(&mut stream).expect("Error reading gr");
-                        let bv =
-                            EqdpDiskModel::read(&mut stream).expect("Error reading bv in eqdp");
+                        let bv = EqdpDisk::read(&mut stream).expect("Error reading bv in eqdp");
                         let slot = self.get_regex_slot();
                         let mut entry = 0;
                         if bv & 1 == 1 {
@@ -183,8 +179,20 @@ impl MetaFileHeader {
                 MetaType::Imc => {
                     let mut ret = Vec::new();
                     let num = block.meta_size / 6;
-                    for _ in 0..num {
-                        let ent = ImcEntry::read(&mut stream);
+                    for i in 0..num {
+                        let ent = ImcEntry::read(&mut stream).expect("Error reading IMC Disk");
+                        ret.push(MetaManipulation::Imc(ImcJson {
+                            PrimaryId: self
+                                .get_regex_pid()
+                                .parse::<u32>()
+                                .expect("Error reading PID"),
+                            Variant: i,
+                            SecondaryId: 0,
+                            ObjectType: self.get_regex_pt(),
+                            EquipSlot: self.get_regex_slot(),
+                            BodySlot: self.get_regex_st(),
+                            Entry: ent,
+                        }));
                     }
                     ret
                 }
@@ -215,26 +223,14 @@ impl MetaFileHeader {
                 }
                 MetaType::Gmp => {
                     stream.set_position(block.meta_offset as u64);
-                    let gmp =
-                        GmpDiskModel::read_le(&mut stream).expect("Error reading gmp disk model");
+                    let gmp = GmpEntry::read_le(&mut stream).expect("Error reading gmp disk model");
                     let mut meta = Vec::new();
                     meta.push(MetaManipulation::Gmp(GmpJson {
                         SetId: self
                             .get_regex_pid()
                             .parse::<u16>()
                             .expect("Failed to parse primary id"),
-                        Entry: GmpEntry {
-                            Enabled: (gmp.val & 1) == 1,
-                            Animated: (gmp.val & 2) == 1,
-                            RotationA: ((gmp.val >> 2) & 0x3FF) as u16,
-                            RotationB: ((gmp.val >> 12) & 0x3FF) as u16,
-                            RotationC: ((gmp.val >> 22) & 0x3FF) as u16,
-                            UnknownA: (gmp.unknown_total & 0x0F) as u8,
-                            UnknownB: ((gmp.unknown_total >> 4) & 0x0F) as u8,
-                            Value: (gmp.val as u64 & !(0xFF00000000))
-                                | ((gmp.unknown_total as u64 & 0xFF) << 32),
-                            UnknownTotal: gmp.unknown_total,
-                        },
+                        Entry: gmp,
                     }));
                     meta
                 }

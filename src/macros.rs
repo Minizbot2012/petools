@@ -11,7 +11,7 @@ macro_rules! define_race_enum {
         paste! {
             #[binrw]
             #[derive(PartialEq, Eq, Debug, Clone, Copy, FromPrimitive)]
-            #[brw(repr =u32)]
+            #[brw(repr = u32)]
             pub enum $name {
                 $(
                     $([<$race $($subrace)? $gender>] = $id)*
