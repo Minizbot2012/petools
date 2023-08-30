@@ -1,0 +1,25 @@
+[package]
+name = "petools"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+regex = "1.9.4"
+binrw = "0.11.2"
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.105"
+structopt = "0.3.26"
+ddsfile = "0.5.1"
+texpresso = "2.0.1"
+bitflags = { version = "2.4.0", features = ["serde"] }
+flate2 = "1.0.27"
+array_tool = "1.0.3"
+num = "0.4.1"
+num-derive = "0.4"
+num-traits = "0.2"
+zip_next = { version = "0.10.3" }
+lazy_static = "1.4.0"
+paste = "1.0.14"
+strum = { version = "0.25.0", features = ["derive"] }
