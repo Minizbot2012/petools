@@ -1,7 +1,7 @@
 use crate::{
     dat::datfile::DatFile,
     files::tex::TexFile,
-    meta::metaparser::{MetaFileHeader, MetaManipulation},
+    meta::metaparser::{MetaFileHeader, MetaManipulation, parse_rsgp},
     structs::ExtendedModPack,
 };
 use binrw::BinRead;
@@ -92,10 +92,14 @@ fn extract(dat: &mut DatFile, offset: u32, fp: PathBuf, root: PathBuf) {
 }
 
 pub fn parse_meta_file(path: String) {
-    let mut file = File::open(path).expect("Error opening file");
+    let mut file = File::open(path.clone()).expect("Error opening file");
     let mut buf = Vec::new();
     file.read_to_end(&mut buf).expect("Error reading file");
-    parse_meta(buf);
+    if path.ends_with(".meta") {
+        parse_meta(buf);
+    } else {
+        parse_rsgp(buf);
+    }
 }
 
 fn parse_meta(meta: Vec<u8>) -> Vec<MetaManipulation> {

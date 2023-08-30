@@ -4,6 +4,7 @@ use super::{
     est::{EstEntry, EstJson, EstType},
     gmp::{GmpEntry, GmpJson},
     imc::{ImcEntry, ImcJson},
+    rgsp::RgspHeader,
 };
 use crate::interop::{
     equipslots::{BodySlot, EquipSlot},
@@ -68,6 +69,10 @@ pub struct MetaFileHeader {
 lazy_static!(
     static ref REG1: Regex = Regex::new(r"chara/(?P<PrimaryType>[a-z]*)/(?P<PrimaryPrefix>[a-z])(?P<PrimaryId>\d{4})(/obj/(?P<SecondaryType>[a-z]*)?/?(?P<SecondaryPrefix>[a-z])?(?P<SecondaryId>\d{4}))?/[a-z]\d{4}.(?P<Slot>[a-z]{3})?(\d{4}?)?\.meta").expect("Failed to compile regex");
 );
+
+pub fn parse_rsgp(data: Vec<u8>) {
+    println!("{:?}", RgspHeader::read_le(&mut Cursor::new(data)).unwrap());
+}
 
 #[allow(dead_code)]
 impl MetaFileHeader {

@@ -23,7 +23,7 @@ macro_rules! define_races {
             $([$id:expr]($race:expr, $gender:expr $(, $subrace:expr)?),)*
         }
         RaceSubrace {
-            $([$racedef:expr]($($subracedef:expr$(,)?)+)$(,)?)*
+            $([$racedef:expr]($($subracedef:expr, $subraceid:expr$(,)?)+)$(,)?)*
         }
         Models {
             $($models:expr,)*
@@ -41,28 +41,50 @@ macro_rules! define_races {
         paste! {
             #[binrw]
             #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, EnumString)]
-            #[brw(repr = u32)]
+            #[brw(repr(u8), little)]
             pub enum Subrace {
+                Unknown = 0,
                 $(
                     $($subracedef,)+
                 )+
+            }
+            #[allow(dead_code)]
+            impl Subrace {
+                pub fn to_id(self) -> u8 {
+                    match self {
+                        $(
+                            $(Subrace::[<$subracedef>] => $subraceid,)+
+                        )+
+                        Subrace::Unknown => 0,
+                    }
+                }
+                pub fn from_id(id: u8) -> Subrace {
+                    match id {
+                        $(
+                            $($subraceid => Subrace::[<$subracedef>],)+
+                        )+
+                        _ => Subrace::Unknown,
+                    }
+                }
             }
         }
 
         paste! {
             #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, EnumString)]
-            #[repr(u8)]
+            #[binrw]
+            #[brw(repr(u8),little)]
             pub enum Gender {
-                Male,
+                Male = 0,
                 Female,
             }
         }
 
         paste! {
             #[binrw]
-            #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, EnumString, FromPrimitive)]
-            #[brw(repr = u32)]
+            #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, EnumString)]
+            #[brw(repr(u32),little)]
             pub enum Race {
+                Unknown,
                 $(
                     $racedef,
                 )+
@@ -72,15 +94,13 @@ macro_rules! define_races {
         paste! {
             #[binrw]
             #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, EnumString, FromPrimitive)]
-            #[brw(repr = u32)]
+            #[brw(repr(u32),little)]
             pub enum GenderRace {
                 $(
                     [<$race $($subrace)? $gender>] = $id,
                 )+
             }
-        }
 
-        paste! {
             impl GenderRace {
                 pub fn split(self) -> (Gender, ModelRace) {
                     match self {
@@ -148,14 +168,14 @@ define_races! {
         [1801](Viera, Female),
     }
     RaceSubrace {
-        [Hyur](Midlander, Highlander),
-        [Elezen](Wildwood, Duskwight),
-        [Lalafell](Plainsfolk, Dunesfolk),
-        [Miqote](Seeker, Keeper),
-        [Roegadyn](SeaWolf, Hellsguard),
-        [AuRa](Raen, Xaela),
-        [Hrothgar](Hellion, Lost),
-        [Viera](Rava, Veena),
+        [Hyur](Midlander, 1, Highlander, 2),
+        [Elezen](Wildwood, 3, Duskwight, 4),
+        [Lalafell](Plainsfolk, 5, Dunesfolk, 6),
+        [Miqote](Seeker, 7, Keeper, 8),
+        [Roegadyn](SeaWolf, 9, Hellsguard, 10),
+        [AuRa](Raen, 11, Xaela, 12),
+        [Hrothgar](Hellion, 13, Lost, 14),
+        [Viera](Rava, 15, Veena, 16),
     }
     Models {
         Midlander,
