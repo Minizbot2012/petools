@@ -4,7 +4,7 @@ use super::{
     est::{EstEntry, EstJson, EstType},
     gmp::{GmpEntry, GmpJson},
     imc::{ImcEntry, ImcJson},
-    rgsp::RgspHeader,
+    rgsp::{RgspHeader, RspJson},
 };
 use crate::interop::{
     equipslots::{BodySlot, EquipSlot},
@@ -27,6 +27,7 @@ pub enum MetaManipulation {
     Gmp(GmpJson),
     Est(EstJson),
     Imc(ImcJson),
+    Rsp(RspJson),
 }
 
 #[binrw]
