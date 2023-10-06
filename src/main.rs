@@ -11,10 +11,26 @@ use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 enum Commands {
-    Export { output: String, ttmp: String },
-    Dds2tex { input: String, output: String },
-    Tex2dds { input: String, output: String },
-    ParseMeta { input: String },
+    Export {
+        output: String,
+        ttmp: String,
+    },
+    Dds2tex {
+        input: String,
+        output: String,
+    },
+    Tex2dds {
+        input: String,
+        output: String,
+    },
+    ParseMeta {
+        input: String,
+    },
+    ScaleExtract {
+        upper: String,
+        lower: String,
+        out: String,
+    },
 }
 
 fn main() {
@@ -29,5 +45,6 @@ fn main() {
         Commands::ParseMeta { input } => {
             tools::parse_meta_file(input);
         }
+        Commands::ScaleExtract { upper, lower, out } => tools::scale_extract(upper, lower, out),
     }
 }
