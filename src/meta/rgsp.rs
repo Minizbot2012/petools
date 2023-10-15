@@ -13,7 +13,7 @@ pub struct RgspHeader {
     pub flag: u8,
     #[br(if(flag == 0xFF, 1))]
     pub ver: u16,
-    #[br(map(|x: u8| Subrace::from_id(x+1)), align_before = if flag == 255 { 0x3 } else { 0x0 })]
+    #[br(map(|x: u8| Subrace::from_id(x+1)))]
     pub sub_race: Subrace,
     pub gender: Gender,
     #[br(if(gender == Gender::Male))]
