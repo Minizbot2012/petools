@@ -6,20 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-regex = "1.10.4"
-binrw = "0.13.3"
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.115"
+binrw = "0.14.0"
 structopt = "0.3.26"
 ddsfile = "0.5.2"
 texpresso = "2.0.1"
-bitflags = { version = "2.5.0", features = ["serde"] }
-flate2 = "1.0.28"
-array_tool = "1.0.3"
-num = "0.4.1"
-num-derive = "0.4"
-num-traits = "0.2"
-zip_next = { version = "0.11.0" }
-lazy_static = "1.4.0"
-paste = "1.0.14"
-strum = { version = "0.26.2", features = ["derive"] }
+bitflags = { version = "2.6.0", features = ["serde"] }
