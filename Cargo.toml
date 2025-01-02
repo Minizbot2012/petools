@@ -1,12 +1,12 @@
 [package]
 name = "petools"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-binrw = "0.14.0"
+binrw = "0.14.1"
 structopt = "0.3.26"
 ddsfile = "0.5.2"
 texpresso = "2.0.1"
